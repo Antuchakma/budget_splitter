@@ -196,6 +196,7 @@ body {
                 <h2>New Here ?</h2>
                 <p>Don't have an account on our website and want to enjoy the great time saving features, just click on the button below to signup</p>
                 <button onclick="window.location.href='signup.php'">SIGN UP</button>
+                <img src="family.png" class="illustration" alt="illustration">
             </div>
         </div>
         <div class="right-side">
