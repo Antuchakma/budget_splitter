@@ -1,0 +1,99 @@
+.splitter-item {
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease-in-out;
+}
+
+.splitter-item:hover {
+    background-color: #e9ecef;
+}
+
+.splitter-item.selected {
+    border-color: #007bff;
+    background-color: #e7f3ff;
+}
+
+.custom-percentage .form-control {
+    height: 32px;
+}
+
+.custom-percentage .input-group-text {
+    background-color: #6c757d;
+    color: white;
+    border-color: #6c757d;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+#customSplitHelper .alert {
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+#totalPercentage {
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+
+.percentage-input:disabled {
+    background-color: #e9ecef;
+    opacity: 0.65;
+}
+
+.transaction-split-info {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.split-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Modal adjustments for better mobile experience */
+@media (max-width: 768px) {
+    .splitter-item .row {
+        flex-direction: column;
+    }
+    
+    .splitter-item .col-6 {
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+    
+    .custom-percentage {
+        margin-top: 0.5rem;
+    }
+}
+
+/* Form validation styling */
+.is-invalid .percentage-input {
+    border-color: #dc3545;
+}
+
+.percentage-validation-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* Animation for split type toggle */
+.custom-percentage {
+    transition: all 0.3s ease-in-out;
+}
+
+#customSplitHelper {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Enhanced transaction card styling */
+.transaction-card .split-indicator {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 1;
+}
