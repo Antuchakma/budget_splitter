@@ -89,4 +89,13 @@ class SplitterController extends Controller
 
         return redirect()->route('room_detail', ['pk' => $room->id])->with('success', 'Room created!');
     }
+    public function roomList()
+    {
+        $rooms = Room::where('creater_id', Auth::id())
+            ->orWhereHas('members', function ($q) {
+                $q->where('member_id', Auth::id());
+            })->get();
+
+        return view('room_list', compact('rooms'));
+    }
 }

@@ -18,3 +18,5 @@ Route::post('/logout', [SplitterController::class, 'logout'])->name('logout');
 // ----------------- Room Management -----------------
 Route::get('/create_room', [SplitterController::class, 'addRoom'])->name('add_room');
 Route::post('/create_room', [SplitterController::class, 'storeRoom']);
+Route::get('/rooms_list', [SplitterController::class, 'roomList'])->name('room_list');
+Route::get('/rooms_detail/{pk}', [SplitterController::class, 'roomDetails'])->name('room_detail');
