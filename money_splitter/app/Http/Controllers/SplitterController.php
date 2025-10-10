@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Room;
 use App\Models\Transaction;
 use App\Models\Debt;
+use App\Models\PersonalIncome;
+use App\Models\PersonalExpense;
 
 class SplitterController extends Controller
 {
@@ -229,4 +231,113 @@ class SplitterController extends Controller
         return redirect()->route('room_detail', $pk)->with('success', "Transaction added and split {$splitMessage}!");
     }
 
+    public function transactionDetails($pk)
+    {
+        $transaction = Transaction::findOrFail($pk);
+        $transaction->load(['payer', 'splitters', 'room', 'room.creater']); // Load relationships
+        $transaction_splitters_username = $transaction->splitters->pluck('name')->toArray();
+
+        // Get room members for the edit form (including creator)
+        $room = $transaction->room;
+        $members_list = $room->members;
+
+        // Add creator to members list if not already included
+        if (!$members_list->contains('id', $room->creater_id)) {
+            $members_list = $members_list->push($room->creater);
+        }
+
+        return view('transaction_details', compact('transaction', 'transaction_splitters_username', 'members_list'));
+    }
+
+    public function updateTransactionForm($pk, $id)
+    {
+        $transaction = Transaction::findOrFail($id);
+        $room = Room::findOrFail($pk);
+        return view('update_transaction', compact('transaction', 'room'));
+    }
+
+    public function updateTransaction(Request $request, $pk, $id)
+    {
+        $request->validate([
+            'amount' => 'required|numeric',
+            'reason' => 'required|string|max:250',
+            'splitters' => 'array'
+        ]);
+
+        $transaction = Transaction::findOrFail($id);
+
+        // Update transaction details
+        $transaction->update([
+            'amount' => $request->amount,
+            'reason' => $request->reason
+        ]);
+
+        // Update splitters if provided
+        if ($request->has('splitters')) {
+            $transaction->splitters()->sync($request->splitters);
+
+            // Delete existing debts for this transaction
+            Debt::where('transaction_id', $transaction->id)->delete();
+
+            // Create new debts for each splitter
+            foreach ($request->splitters as $splitter_id) {
+                if ($splitter_id != $transaction->payer_id) {
+                    Debt::create([
+                        'room_id' => $pk,
+                        'transaction_id' => $transaction->id,
+                        'sender_id' => $splitter_id,
+                        'receiver_id' => $transaction->payer_id,
+                        'amount' => $request->amount / count($request->splitters)
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('transaction_details', $id)->with('success', 'Transaction updated successfully!');
+    }
+    public function personalBudget()
+    {
+        $userId = Auth::id();
+
+        // Get all incomes and expenses for the user
+        $incomes = PersonalIncome::where('user_id', $userId)->get();
+        $expenses = PersonalExpense::where('user_id', $userId)->get();
+
+        // Calculate totals
+        $total_income = $incomes->sum('amount');
+        $total_expenses = $expenses->sum('amount');
+        $total_bud = $total_income - $total_expenses;
+
+        return view('personal_budget', compact(
+            'incomes',
+            'expenses',
+            'total_income',
+            'total_expenses',
+            'total_bud'
+        ));
+    }
+    public function myDebts()
+    {
+        $userId = Auth::id();
+
+        // Payments the user will receive
+        $incomes = Debt::where('receiver_id', $userId)
+            ->with(['sender', 'transaction', 'room'])
+            ->get();
+
+        // Payments the user needs to pay
+        $expenses = Debt::where('sender_id', $userId)
+            ->with(['receiver', 'transaction', 'room'])
+            ->get();
+
+        return view('my_debts', compact('incomes', 'expenses'));
+    }
+
+
+    public function deleteDebt($pk)
+    {
+        $debt = Debt::findOrFail($pk);
+        $debt->delete();
+        return redirect()->route('my_debts')->with('success', 'Debt settled!');
+    }
 }
