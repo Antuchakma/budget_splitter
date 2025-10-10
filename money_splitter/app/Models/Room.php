@@ -21,4 +21,8 @@ class Room extends Model
     {
         return $this->belongsToMany(User::class, 'room_members', 'room_id', 'member_id');
     }
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }
