@@ -25,4 +25,8 @@ class Room extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+    public function debts()
+    {
+        return $this->hasMany(Debt::class);
+    }
 }

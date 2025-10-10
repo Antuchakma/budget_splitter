@@ -31,6 +31,10 @@ class Transaction extends Model
         return $this->belongsToMany(User::class, 'transaction_user', 'transaction_id', 'user_id');
     }
 
+    public function debts()
+    {
+        return $this->hasMany(Debt::class);
+    }
    
 
     /**
