@@ -172,7 +172,6 @@ class SplitterController extends Controller
             'percentages' => 'required_if:split_type,custom|array'
         ]);
 
-        // For custom splits, validate percentages sum to 100
         if ($request->split_type === 'custom') {
             $totalPercentage = array_sum(array_filter($request->percentages, 'is_numeric'));
             if (abs($totalPercentage - 100) > 0.01) {
@@ -252,5 +251,85 @@ class SplitterController extends Controller
         $debt->delete();
         return redirect()->route('my_debts')->with('success', 'Debt settled!');
     }
+    public function finalSettlements()
+    {
+        $userId = Auth::id();
 
+        $incomes = Debt::where('receiver_id', $userId)
+            ->with(['sender', 'transaction', 'room'])
+            ->get();
+
+        $expenses = Debt::where('sender_id', $userId)
+            ->with(['receiver', 'transaction', 'room'])
+            ->get();
+
+        $netIncomes = collect();
+        $netExpenses = collect();
+
+        $incomeGroups = $incomes->groupBy('sender_id');
+        foreach ($incomeGroups as $senderId => $debts) {
+            $totalAmount = $debts->sum('amount');
+            $sender = $debts->first()->sender;
+
+            $netIncomes->push((object)[
+                'sender' => $sender,
+                'final_amount' => $totalAmount
+            ]);
+        }
+
+        $expenseGroups = $expenses->groupBy('receiver_id');
+        foreach ($expenseGroups as $receiverId => $debts) {
+            $totalAmount = $debts->sum('amount');
+            $receiver = $debts->first()->receiver;
+
+            $netExpenses->push((object)[
+                'receiver' => $receiver,
+                'final_amount' => $totalAmount
+            ]);
+        }
+
+        $user_receiver_positive = collect();
+        $user_sender_negative = collect();
+
+        foreach ($netIncomes as $income) {
+            $senderId = $income->sender->id;
+            $incomeAmount = $income->final_amount;
+
+            $correspondingExpense = $netExpenses->firstWhere('receiver.id', $senderId);
+
+            if ($correspondingExpense) {
+                $expenseAmount = $correspondingExpense->final_amount;
+                $netAmount = $incomeAmount - $expenseAmount;
+
+                if ($netAmount > 0) {
+                    // Net: they owe us money
+                    $user_receiver_positive->push((object)[
+                        'sender' => $income->sender,
+                        'final_amount' => $netAmount
+                    ]);
+                } elseif ($netAmount < 0) {
+                    // Net: we owe them money
+                    $user_sender_negative->push((object)[
+                        'receiver' => $income->sender,
+                        'final_amount' => abs($netAmount)
+                    ]);
+                }
+                $netExpenses = $netExpenses->reject(function ($expense) use ($senderId) {
+                    return $expense->receiver->id == $senderId;
+                });
+            } else {
+                // Pure income - they owe us money
+                $user_receiver_positive->push($income);
+            }
+        }
+
+        foreach ($netExpenses as $expense) {
+            $user_sender_negative->push($expense);
+        }
+
+        $noincome = $user_receiver_positive->isEmpty();
+        $noexpense = $user_sender_negative->isEmpty();
+
+        return view('final_settlements', compact('user_receiver_positive', 'user_sender_negative', 'noincome', 'noexpense'));
+    }
 }
