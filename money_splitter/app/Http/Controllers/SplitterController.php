@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Hash;
+use App\Models\Room;
+
 class SplitterController extends Controller
 {
     public function index()
@@ -68,5 +70,23 @@ class SplitterController extends Controller
     {
         Auth::logout();
         return redirect()->route('index');
+    }
+    public function addRoom()
+    {
+        return view('add_room');
+    }
+
+    public function storeRoom(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:250'
+        ]);
+
+        $room = Room::create([
+            'name' => $request->name,
+            'creater_id' => Auth::id()
+        ]);
+
+        return redirect()->route('room_detail', ['pk' => $room->id])->with('success', 'Room created!');
     }
 }
