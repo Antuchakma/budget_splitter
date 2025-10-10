@@ -18,7 +18,6 @@ Route::post('/logout', [SplitterController::class, 'logout'])->name('logout');
 // ----------------- Room Management -----------------
 Route::get('/create_room', [SplitterController::class, 'addRoom'])->name('add_room');
 Route::post('/create_room', [SplitterController::class, 'storeRoom']);
-<<<<<<< HEAD
 // ----------------- Members -----------------
 Route::get('/members_list/{pk}', [SplitterController::class, 'listMembers'])->name('list_members');
 Route::post('/add_members/{pk}/add/{id}', [SplitterController::class, 'addMember'])->name('add_member');
@@ -34,7 +33,3 @@ Route::get('/my_debts', [SplitterController::class, 'myDebts'])->name('my_debts'
 Route::delete('/settle_debt/{pk}', [SplitterController::class, 'deleteDebt'])->name('delete_debt');
 Route::get('/final_settlements', [SplitterController::class, 'finalSettlements'])->name('final_settlements');
 
-=======
-Route::get('/rooms_list', [SplitterController::class, 'roomList'])->name('room_list');
-Route::get('/rooms_detail/{pk}', [SplitterController::class, 'roomDetails'])->name('room_detail');
->>>>>>> backend/create_room
