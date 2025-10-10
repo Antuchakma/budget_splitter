@@ -21,3 +21,7 @@ Route::post('/create_room', [SplitterController::class, 'storeRoom']);
 // ----------------- Members -----------------
 Route::get('/members_list/{pk}', [SplitterController::class, 'listMembers'])->name('list_members');
 Route::post('/add_members/{pk}/add/{id}', [SplitterController::class, 'addMember'])->name('add_member');
+
+// ----------------- Transactions -----------------
+Route::get('/{pk}/update_transaction/{id}', [SplitterController::class, 'updateTransactionForm'])->name('update_transaction');
+Route::put('/{pk}/update_transaction/{id}', [SplitterController::class, 'updateTransaction']);

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Hash;
 use App\Models\Room;
+use App\Models\Transaction;
+use App\Models\Debt;
 
 class SplitterController extends Controller
 {
@@ -152,4 +154,79 @@ class SplitterController extends Controller
 
         return view('members_list', compact('room', 'members_list'));
     }
+
+    public function createTransactionForm($pk)
+    {
+        $room = Room::findOrFail($pk);
+        $members = $room->members;
+        return view('create_transaction', compact('room', 'members'));
+    }
+
+    public function storeTransaction(Request $request, $pk)
+    {
+        $request->validate([
+            'amount' => 'required|numeric',
+            'reason' => 'required|string|max:250',
+            'splitters' => 'required|array',
+            'split_type' => 'required|in:equal,custom',
+            'percentages' => 'required_if:split_type,custom|array'
+        ]);
+
+        // For custom splits, validate percentages sum to 100
+        if ($request->split_type === 'custom') {
+            $totalPercentage = array_sum(array_filter($request->percentages, 'is_numeric'));
+            if (abs($totalPercentage - 100) > 0.01) {
+                return back()->withErrors(['percentages' => 'Percentages must total exactly 100%'])->withInput();
+            }
+        }
+
+        // Prepare shares data
+        $shares = [];
+        if ($request->split_type === 'custom') {
+            // Custom percentages
+            foreach ($request->splitters as $splitter_id) {
+                $percentage = $request->percentages[$splitter_id] ?? 0;
+                if ($percentage > 0) {
+                    $shares[$splitter_id] = floatval($percentage);
+                }
+            }
+        } else {
+            // Equal split
+            $equalPercentage = 100 / count($request->splitters);
+            foreach ($request->splitters as $splitter_id) {
+                $shares[$splitter_id] = $equalPercentage;
+            }
+        }
+
+        $transaction = Transaction::create([
+            'room_id' => $pk,
+            'payer_id' => Auth::id(),
+            'amount' => $request->amount,
+            'reason' => $request->reason,
+            'split_type' => $request->split_type,
+            'shares' => $shares
+        ]);
+
+        $transaction->splitters()->sync($request->splitters);
+
+        // Create debts for each splitter based on their share
+        foreach ($request->splitters as $splitter_id) {
+            if ($splitter_id != Auth::id()) {
+                $sharePercentage = $shares[$splitter_id] ?? 0;
+                $debtAmount = ($request->amount * $sharePercentage) / 100;
+
+                Debt::create([
+                    'room_id' => $pk,
+                    'transaction_id' => $transaction->id,
+                    'sender_id' => $splitter_id,
+                    'receiver_id' => Auth::id(),
+                    'amount' => $debtAmount
+                ]);
+            }
+        }
+
+        $splitMessage = $request->split_type === 'custom' ? 'with custom percentages' : 'equally';
+        return redirect()->route('room_detail', $pk)->with('success', "Transaction added and split {$splitMessage}!");
+    }
+
 }
