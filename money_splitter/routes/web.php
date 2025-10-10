@@ -26,6 +26,10 @@ Route::post('/add_members/{pk}/add/{id}', [SplitterController::class, 'addMember
 Route::get('/{pk}/update_transaction/{id}', [SplitterController::class, 'updateTransactionForm'])->name('update_transaction');
 Route::put('/{pk}/update_transaction/{id}', [SplitterController::class, 'updateTransaction']);
 
+Route::get('/transaction_details/{pk}', [SplitterController::class, 'transactionDetails'])->name('transaction_details');
+Route::get('/personal_budget', [SplitterController::class, 'personalBudget'])->name('personal_budget');
+
 Route::get('/my_debts', [SplitterController::class, 'myDebts'])->name('my_debts');
 Route::delete('/settle_debt/{pk}', [SplitterController::class, 'deleteDebt'])->name('delete_debt');
 Route::get('/final_settlements', [SplitterController::class, 'finalSettlements'])->name('final_settlements');
+
