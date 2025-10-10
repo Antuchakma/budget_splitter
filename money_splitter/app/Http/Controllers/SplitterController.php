@@ -209,7 +209,7 @@ class SplitterController extends Controller
 
         $transaction->splitters()->sync($request->splitters);
 
-        // Create debts for each splitter based on their share
+       
         foreach ($request->splitters as $splitter_id) {
             if ($splitter_id != Auth::id()) {
                 $sharePercentage = $shares[$splitter_id] ?? 0;
@@ -227,6 +227,30 @@ class SplitterController extends Controller
 
         $splitMessage = $request->split_type === 'custom' ? 'with custom percentages' : 'equally';
         return redirect()->route('room_detail', $pk)->with('success', "Transaction added and split {$splitMessage}!");
+    }
+    public function myDebts()
+    {
+        $userId = Auth::id();
+
+        // Payments the user will receive
+        $incomes = Debt::where('receiver_id', $userId)
+            ->with(['sender', 'transaction', 'room'])
+            ->get();
+
+        // Payments the user needs to pay
+        $expenses = Debt::where('sender_id', $userId)
+            ->with(['receiver', 'transaction', 'room'])
+            ->get();
+
+        return view('my_debts', compact('incomes', 'expenses'));
+    }
+
+
+    public function deleteDebt($pk)
+    {
+        $debt = Debt::findOrFail($pk);
+        $debt->delete();
+        return redirect()->route('my_debts')->with('success', 'Debt settled!');
     }
 
 }
