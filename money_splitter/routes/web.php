@@ -18,3 +18,6 @@ Route::post('/logout', [SplitterController::class, 'logout'])->name('logout');
 // ----------------- Room Management -----------------
 Route::get('/create_room', [SplitterController::class, 'addRoom'])->name('add_room');
 Route::post('/create_room', [SplitterController::class, 'storeRoom']);
+// ----------------- Members -----------------
+Route::get('/members_list/{pk}', [SplitterController::class, 'listMembers'])->name('list_members');
+Route::post('/add_members/{pk}/add/{id}', [SplitterController::class, 'addMember'])->name('add_member');
