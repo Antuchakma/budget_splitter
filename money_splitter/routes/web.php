@@ -3,8 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SplitterController;
 
+<<<<<<< HEAD
 // ----------------- Home Page -----------------
 Route::get('/', [SplitterController::class, 'index'])->name('index');
+=======
+
+Route::post('/add_personal_budget', [SplitterController::class, 'addPersonalBudget'])->name('add_personal_budget');
+>>>>>>> add_expense_income
 
 // ----------------- Authentication -----------------
 Route::get('/signup', [SplitterController::class, 'signup'])->name('signup');
