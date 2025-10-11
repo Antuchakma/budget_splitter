@@ -4,43 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-<<<<<<< HEAD
+
+use Illuminate\Support\Facades\Auth;
+
+use Illuminate\Support\Facades\Hash;
 use App\Models\Room;
 use App\Models\RoomMembers;
 use App\Models\Transaction;
 use App\Models\Debt;
+use App\Models\PersonalIncome;
+use App\Models\PersonalExpense;
 use App\Models\FinalTransaction;
-use App\Models\PersonalIncome;
-use App\Models\PersonalExpense;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
-class SplitterController extends Controller
-{
-    public function deletePersonalIncome($pk)
-    {
-        $income = PersonalIncome::findOrFail($pk);
-        $income->delete();
-        return redirect()->route('personal_budget')->with('success', 'Income deleted!');
-    }
 
-    public function deletePersonalExpense($pk)
-    {
-        $expense = PersonalExpense::findOrFail($pk);
-        $expense->delete();
-        return redirect()->route('personal_budget')->with('success', 'Expense deleted!');
-    }
-}
-=======
-
-use Illuminate\Support\Facades\Auth;
-
-use Illuminate\Support\Facades\Hash;
-use App\Models\Room;
-use App\Models\Transaction;
-use App\Models\Debt;
-use App\Models\PersonalIncome;
-use App\Models\PersonalExpense;
 
 class SplitterController extends Controller
 {
@@ -467,6 +443,72 @@ class SplitterController extends Controller
 
         return redirect()->route('transaction_details', $id)->with('success', 'Transaction updated successfully!');
     }
+    public function deletePersonalIncome($pk)
+    {
+        $income = PersonalIncome::findOrFail($pk);
+        $income->delete();
+        return redirect()->route('personal_budget')->with('success', 'Income deleted!');
+    }
+
+    public function deletePersonalExpense($pk)
+    {
+        $expense = PersonalExpense::findOrFail($pk);
+        $expense->delete();
+        return redirect()->route('personal_budget')->with('success', 'Expense deleted!');
+    }
+    public function personalBudget()
+    {
+        $userId = Auth::id();
+
+        // Get all incomes and expenses for the user
+        $incomes = PersonalIncome::where('user_id', $userId)->get();
+        $expenses = PersonalExpense::where('user_id', $userId)->get();
+
+        // Calculate totals
+        $total_income = $incomes->sum('amount');
+        $total_expenses = $expenses->sum('amount');
+        $total_bud = $total_income - $total_expenses;
+
+        return view('personal_budget', compact(
+            'incomes',
+            'expenses',
+            'total_income',
+            'total_expenses',
+            'total_bud'
+        ));
+    }
+
+    public function addPersonalBudget(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|string|in:inc,exp',
+            'description' => 'required|string|max:250',
+            'amount' => 'required|numeric'
+        ]);
+
+        if ($request->type == 'inc') {
+            PersonalIncome::create([
+                'user_id' => Auth::id(),
+                'description' => $request->description,
+                'amount' => $request->amount
+            ]);
+        } else {
+            PersonalExpense::create([
+                'user_id' => Auth::id(),
+                'description' => $request->description,
+                'amount' => $request->amount
+            ]);
+        }
+
+        return redirect()->route('personal_budget')->with('success', 'Entry added!');
+    }
+
+
+    // ---------------- Static Pages ----------------
+    public function joinUs()
+    {
+        return view('joinus');
+    }
+
 }
 
->>>>>>> 48687ee3cb2fc713c1daf47d621d07886a456caf
