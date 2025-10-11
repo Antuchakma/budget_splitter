@@ -22,7 +22,16 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+    public function createdRooms()
+    {
+        return $this->hasMany(Room::class, 'creater_id');
+    }
 
+    public function memberRooms()
+    {
+        return $this->belongsToMany(Room::class, 'room_members', 'member_id', 'room_id');
+    }
+  
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -38,11 +47,8 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed', // Laravel 10+ will hash automatically if you use this
+    ];
 }

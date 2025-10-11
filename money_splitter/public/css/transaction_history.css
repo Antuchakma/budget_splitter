@@ -1,0 +1,108 @@
+/* Transaction History Page Styles */
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.stat-card h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.stat-card small {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.transaction-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.transaction-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-details {
+    margin: 15px 0;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.amount {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.card-header h6 {
+    font-weight: 600;
+}
+
+.btn-sm {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stat-card {
+        margin-bottom: 5px;
+    }
+    
+    .stat-card h4 {
+        font-size: 1rem;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+    
+    .detail-row strong {
+        margin-bottom: 3px;
+    }
+}
+
+/* Search form improvements */
+.input-group .btn {
+    border-radius: 0;
+}
+
+.input-group .btn:last-child {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+
+/* Card variations */
+.border-success {
+    border-left: 4px solid #28a745 !important;
+}
+
+.border-info {
+    border-left: 4px solid #17a2b8 !important;
+}
+
+/* Empty state styling */
+.fa-receipt {
+    opacity: 0.3;
+}
