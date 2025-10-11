@@ -9,10 +9,14 @@ use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Hash;
 use App\Models\Room;
+use App\Models\RoomMembers;
 use App\Models\Transaction;
 use App\Models\Debt;
 use App\Models\PersonalIncome;
 use App\Models\PersonalExpense;
+use App\Models\FinalTransaction;
+
+
 
 class SplitterController extends Controller
 {
@@ -439,5 +443,26 @@ class SplitterController extends Controller
 
         return redirect()->route('transaction_details', $id)->with('success', 'Transaction updated successfully!');
     }
+    public function deletePersonalIncome($pk)
+    {
+        $income = PersonalIncome::findOrFail($pk);
+        $income->delete();
+        return redirect()->route('personal_budget')->with('success', 'Income deleted!');
+    }
+
+    public function deletePersonalExpense($pk)
+    {
+        $expense = PersonalExpense::findOrFail($pk);
+        $expense->delete();
+        return redirect()->route('personal_budget')->with('success', 'Expense deleted!');
+    }
+
+   
+    // ---------------- Static Pages ----------------
+    public function joinUs()
+    {
+        return view('joinus');
+    }
+
 }
 
