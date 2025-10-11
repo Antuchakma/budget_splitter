@@ -2,19 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SplitterController;
-<<<<<<< HEAD
+
 
 Route::delete('/delete_personal_income/{pk}', [SplitterController::class, 'deletePersonalIncome'])->name('delete_personal_income');
 Route::delete('/delete_personal_expense/{pk}', [SplitterController::class, 'deletePersonalExpense'])->name('delete_personal_expense');
-=======
 
-<<<<<<< HEAD
+
 // ----------------- Home Page -----------------
 Route::get('/', [SplitterController::class, 'index'])->name('index');
-=======
 
 Route::post('/add_personal_budget', [SplitterController::class, 'addPersonalBudget'])->name('add_personal_budget');
->>>>>>> add_expense_income
 
 // ----------------- Authentication -----------------
 Route::get('/signup', [SplitterController::class, 'signup'])->name('signup');
@@ -46,4 +43,4 @@ Route::get('/transaction_history', [SplitterController::class, 'transactionHisto
 
 Route::get('/transaction_details/{pk}', [SplitterController::class, 'transactionDetails'])->name('transaction_details');
 
->>>>>>> 48687ee3cb2fc713c1daf47d621d07886a456caf
+
