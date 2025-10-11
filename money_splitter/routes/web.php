@@ -8,8 +8,13 @@ Route::delete('/delete_personal_income/{pk}', [SplitterController::class, 'delet
 Route::delete('/delete_personal_expense/{pk}', [SplitterController::class, 'deletePersonalExpense'])->name('delete_personal_expense');
 =======
 
+<<<<<<< HEAD
 // ----------------- Home Page -----------------
 Route::get('/', [SplitterController::class, 'index'])->name('index');
+=======
+
+Route::post('/add_personal_budget', [SplitterController::class, 'addPersonalBudget'])->name('add_personal_budget');
+>>>>>>> add_expense_income
 
 // ----------------- Authentication -----------------
 Route::get('/signup', [SplitterController::class, 'signup'])->name('signup');
