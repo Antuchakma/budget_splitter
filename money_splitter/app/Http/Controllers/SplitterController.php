@@ -334,4 +334,109 @@ class SplitterController extends Controller
 
         return view('final_settlements', compact('user_receiver_positive', 'user_sender_negative', 'noincome', 'noexpense'));
     }
+    public function transactionHistory(Request $request)
+    {
+        $userId = Auth::id();
+
+        // Get transactions where user is the payer
+        $payerTransactions = Transaction::where('payer_id', $userId)
+            ->with(['room', 'splitters'])
+            ->get();
+
+        // Get transactions where user is a splitter
+        $splitterTransactions = Transaction::whereHas('splitters', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })->where('payer_id', '!=', $userId) // Exclude if already included as payer
+            ->with(['room', 'payer', 'splitters'])
+            ->get();
+
+        // Combine and sort by date (newest first)
+        $allTransactions = $payerTransactions->merge($splitterTransactions)
+            ->sortByDesc('created_at');
+
+        // Apply search filter if provided
+        if ($request->has('q') && !empty($request->q)) {
+            $searchTerm = $request->q;
+            $allTransactions = $allTransactions->filter(function ($transaction) use ($searchTerm) {
+                return stripos($transaction->reason, $searchTerm) !== false ||
+                    stripos($transaction->room->name, $searchTerm) !== false ||
+                    stripos($transaction->payer->name, $searchTerm) !== false;
+            });
+        }
+
+        // Calculate statistics
+        $totalPaid = $payerTransactions->sum('amount');
+        $totalSplitTransactions = $splitterTransactions->count();
+        $totalPaidTransactions = $payerTransactions->count();
+
+        return view('transaction_history', compact(
+            'allTransactions',
+            'totalPaid',
+            'totalSplitTransactions',
+            'totalPaidTransactions'
+        ));
+    }
+    public function transactionDetails($pk)
+    {
+        $transaction = Transaction::findOrFail($pk);
+        $transaction->load(['payer', 'splitters', 'room', 'room.creater']); // Load relationships
+        $transaction_splitters_username = $transaction->splitters->pluck('name')->toArray();
+
+        // Get room members for the edit form (including creator)
+        $room = $transaction->room;
+        $members_list = $room->members;
+
+        // Add creator to members list if not already included
+        if (!$members_list->contains('id', $room->creater_id)) {
+            $members_list = $members_list->push($room->creater);
+        }
+
+        return view('transaction_details', compact('transaction', 'transaction_splitters_username', 'members_list'));
+    }
+    public function updateTransactionForm($pk, $id)
+    {
+        $transaction = Transaction::findOrFail($id);
+        $room = Room::findOrFail($pk);
+        return view('update_transaction', compact('transaction', 'room'));
+    }
+
+    public function updateTransaction(Request $request, $pk, $id)
+    {
+        $request->validate([
+            'amount' => 'required|numeric',
+            'reason' => 'required|string|max:250',
+            'splitters' => 'array'
+        ]);
+
+        $transaction = Transaction::findOrFail($id);
+
+        // Update transaction details
+        $transaction->update([
+            'amount' => $request->amount,
+            'reason' => $request->reason
+        ]);
+
+        // Update splitters if provided
+        if ($request->has('splitters')) {
+            $transaction->splitters()->sync($request->splitters);
+
+            // Delete existing debts for this transaction
+            Debt::where('transaction_id', $transaction->id)->delete();
+
+            // Create new debts for each splitter
+            foreach ($request->splitters as $splitter_id) {
+                if ($splitter_id != $transaction->payer_id) {
+                    Debt::create([
+                        'room_id' => $pk,
+                        'transaction_id' => $transaction->id,
+                        'sender_id' => $splitter_id,
+                        'receiver_id' => $transaction->payer_id,
+                        'amount' => $request->amount / count($request->splitters)
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('transaction_details', $id)->with('success', 'Transaction updated successfully!');
+    }
 }

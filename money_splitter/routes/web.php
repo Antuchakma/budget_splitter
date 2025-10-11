@@ -32,4 +32,7 @@ Route::get('/personal_budget', [SplitterController::class, 'personalBudget'])->n
 Route::get('/my_debts', [SplitterController::class, 'myDebts'])->name('my_debts');
 Route::delete('/settle_debt/{pk}', [SplitterController::class, 'deleteDebt'])->name('delete_debt');
 Route::get('/final_settlements', [SplitterController::class, 'finalSettlements'])->name('final_settlements');
+Route::get('/transaction_history', [SplitterController::class, 'transactionHistory'])->name('transaction_history');
+
+Route::get('/transaction_details/{pk}', [SplitterController::class, 'transactionDetails'])->name('transaction_details');
 
