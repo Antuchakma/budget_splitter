@@ -456,8 +456,54 @@ class SplitterController extends Controller
         $expense->delete();
         return redirect()->route('personal_budget')->with('success', 'Expense deleted!');
     }
+    public function personalBudget()
+    {
+        $userId = Auth::id();
 
-   
+        // Get all incomes and expenses for the user
+        $incomes = PersonalIncome::where('user_id', $userId)->get();
+        $expenses = PersonalExpense::where('user_id', $userId)->get();
+
+        // Calculate totals
+        $total_income = $incomes->sum('amount');
+        $total_expenses = $expenses->sum('amount');
+        $total_bud = $total_income - $total_expenses;
+
+        return view('personal_budget', compact(
+            'incomes',
+            'expenses',
+            'total_income',
+            'total_expenses',
+            'total_bud'
+        ));
+    }
+
+    public function addPersonalBudget(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|string|in:inc,exp',
+            'description' => 'required|string|max:250',
+            'amount' => 'required|numeric'
+        ]);
+
+        if ($request->type == 'inc') {
+            PersonalIncome::create([
+                'user_id' => Auth::id(),
+                'description' => $request->description,
+                'amount' => $request->amount
+            ]);
+        } else {
+            PersonalExpense::create([
+                'user_id' => Auth::id(),
+                'description' => $request->description,
+                'amount' => $request->amount
+            ]);
+        }
+
+        return redirect()->route('personal_budget')->with('success', 'Entry added!');
+    }
+
+
     // ---------------- Static Pages ----------------
     public function joinUs()
     {
