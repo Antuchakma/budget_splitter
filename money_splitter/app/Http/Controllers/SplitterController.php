@@ -440,3 +440,4 @@ class SplitterController extends Controller
         return redirect()->route('transaction_details', $id)->with('success', 'Transaction updated successfully!');
     }
 }
+
