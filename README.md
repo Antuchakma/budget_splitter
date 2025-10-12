@@ -1,4 +1,5 @@
 Money-Splitter
+
 Money splitting app built using HTML, CSS, PHP, and Laravel.
 
 Money Splitter is an easy-to-use money splitting app where you can keep track of your budgets and calculate how much money you have to give or take from your friends. This app is especially useful during trips and events where splitting expenses and tracking payments is necessary.
